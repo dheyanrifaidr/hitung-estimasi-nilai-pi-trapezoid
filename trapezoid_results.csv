@@ -1,0 +1,42 @@
+import numpy as np
+import time
+import csv
+
+# Fungsi untuk integrasi trapezoid
+def integrasi_trapezoid(N):
+    a, b = 0, 1
+    dx = (b - a) / N
+    x = np.linspace(a, b, N+1)
+    f_x = 4 / (1 + x**2)
+    integral = (dx/2) * (f_x[0] + 2*np.sum(f_x[1:N]) + f_x[N])
+    return integral
+
+# Fungsi untuk melakukan pengujian dan menyimpan hasil ke file CSV
+def test_method(N_values, method_func, method_name, exact_pi=3.14159265358979323846, output_file='trapezoid_results.csv'):
+    results = []
+    for N in N_values:
+        start_time = time.time()
+        approx_pi = method_func(N)
+        end_time = time.time()
+        
+        error = np.abs(approx_pi - exact_pi)
+        execution_time = end_time - start_time
+        
+        results.append({
+            "N": N,
+            "approx_pi": approx_pi,
+            "error": error,
+            "execution_time": execution_time
+        })
+        
+        print(f'{method_name} - N={N}, Approximated Pi={approx_pi}, Error={error}, Execution Time={execution_time:.6f} seconds')
+    
+    # Menulis hasil ke file CSV
+    with open(output_file, mode='w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=["N", "approx_pi", "error", "execution_time"])
+        writer.writeheader()
+        writer.writerows(results)
+
+if __name__ == "__main__":
+    N_values = [10, 100, 1000, 10000]
+    test_method(N_values, integrasi_trapezoid, 'Trapezoid')
